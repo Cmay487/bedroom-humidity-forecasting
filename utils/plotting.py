@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from utils.config import title_params
@@ -31,31 +32,36 @@ def plot_time_series(
         fig, axes = plt.subplots(len(y_col), 1, figsize=(12, 8))
 
         # plot the subplots
-        plot_subplots(axes, y_col, x_col, dfs[0], title, xlabel, ylabel)
+        plot_subplots(axes, y_col, x_col, dfs[0])
+
+        # clean plot
+        plot_cleanup(axes, title, xlabel, ylabel)
 
     else:
         fig = plt.figure(figsize=(12, 8))
 
         # plt a single plot
-        plot_single_plot(dfs, x_col, y_col[0], title, xlabel, ylabel)
+        plot_single_plot(dfs, x_col, y_col[0])
+
+        # clean plot
+        plot_cleanup(None, title, xlabel, ylabel)
 
 
     if add_hlines:
         # add horizontal lines
-        add_hlines(fig, [40, 60])
+        plot_hlines(fig, [40, 60])
 
     # save the image in plts
     save_image(saved_name, fig)
 
+    # show result
+    plt.show()
 
 def plot_subplots(
         axes:object, 
         y_col: list[str], 
         x_col: str, 
         df: pd.DataFrame,
-        title: str | None = None, 
-        xlabel: str | None = None, 
-        ylabel: str | None = None
         ) -> None:
     """
     Plots subplots for the given y_col and x_col.
@@ -76,16 +82,10 @@ def plot_subplots(
             ax=axes[idx]
         )
 
-    # adjust the layout of the subplots
-    plot_cleanup(axes, title, xlabel, ylabel)
-
 def plot_single_plot(
         dfs: list[pd.DataFrame], 
         x_col: str, 
-        y_col: list[str], 
-        title: str | None = None, 
-        xlabel: str | None = None, 
-        ylabel: str | None = None
+        y_col: list[str]
         ) -> None:
     """
     Plots a single line plot for the given y_col and x_col.
@@ -94,9 +94,6 @@ def plot_single_plot(
     dfs (list): List of DataFrames containing the data.
     x_col (str): Name of the column to be used for the x-axis (time).
     y_col (list[str]): List of column names to be used for the y-axis (values).
-    title (str, optional): Title of the plot. Defaults to None.
-    xlabel (str, optional): Label for the x-axis. Defaults to None.
-    ylabel (str, optional): Label for the y-axis. Defaults to None.
     """
     
     # because we are comparing 2 dfs, use a counter to determine the color of the line
@@ -109,10 +106,7 @@ def plot_single_plot(
             color='blue' if idx == 1 else 'green',
         )
 
-    # make adjsutments to the plot
-    plot_cleanup(None, title, xlabel, ylabel)
-
-def add_hlines(fig: object,y_values: list[float]) -> None:
+def plot_hlines(fig: object,y_values: list[float]) -> None:
     """
     Adds horizontal lines to the plot.
 
@@ -121,19 +115,17 @@ def add_hlines(fig: object,y_values: list[float]) -> None:
     y_values (list[float]): List of y-values where the lines should be drawn.
     """
 
-    # get the count of plots
-    plot_count = len(fig.axes)
-
     # loop through the axes and add the horizontal lines
-    for i in range(plot_count):
-        fig.axes[i].axhline(
-            y=y_values, 
-            color='grey', 
-            linestyle='--', 
-            alpha=0.7, 
-            linewidth=2.5
+    for ax in fig.axes:
+        for y in y_values:
+            ax.axhline(
+                y=y,
+                color='grey',
+                linestyle='--',
+                alpha=0.5,
+                linewidth=2.5,
             )
-
+            
 def plot_cleanup(
         axes: object | None = None, 
         title: str | None = None, 
@@ -149,31 +141,29 @@ def plot_cleanup(
     xlabel (str, optional): Label for the x-axis. Defaults to None.
     ylabel (str, optional): Label for the y-axis. Defaults to None.
 
-    """      
-    if axes is not None:
-        if title:
-            axes[0].suptitle(title, **title_params)
+    """    
+    # add suptitle
+    plt.suptitle(title, **title_params)
+    if axes is not None:     
         for ax in axes:
             if xlabel:
                 ax.set_xlabel(xlabel)
             if ylabel:
                 ax.set_ylabel(ylabel)
-            ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+            
+            # remove gridlines    
             ax.grid(False)
     else:
-        if title:
-            plt.title(title, **title_params)
         if xlabel:
             plt.xlabel(xlabel)
         if ylabel:
             plt.ylabel(ylabel)
 
-        plt.xticks(rotation=45)
+        # remove gridlines
         plt.grid(False)
 
     # despine
     sns.despine()
-    plt.show()
 
 def plot_histogram(
     dfs: list[pd.DataFrame],
@@ -220,14 +210,7 @@ def plot_histogram(
             bins=bins
         )
 
-    
-    if title:
-        plt.title(title, **title_params)
-    if xlabel:
-        plt.xlabel(xlabel)
-    if ylabel:
-        plt.ylabel(ylabel)
-    
+    plot_cleanup(None, title, xlabel, ylabel)
 
     #save the image
     save_image(saved_name, fig)
@@ -270,8 +253,7 @@ def plot_relationships(
             ci=95
         )
 
-    # add title
-    plt.suptitle(title, **title_params)
+    plot_cleanup(axes, title, xlabel, ylabel)
 
 
     # save the image
@@ -281,14 +263,3 @@ def plot_relationships(
 def save_image(file_name:str, fig:object):
     
     fig.savefig(f"plots/{file_name}.png", dpi=300, bbox_inches="tight")
-
-# def apply_standard_plotting_style():
-#     """
-#     Applies a standard plotting style to all plots.
-#     """
-#     plt.style.use('seaborn-darkgrid')
-#     plt.rcParams['figure.figsize'] = (12, 8)
-#     plt.rcParams['axes.labelsize'] = 14
-#     plt.rcParams['axes.titlesize'] = 16
-#     plt.rcParams['xtick.labelsize'] = 12
-#     plt.rcParams['ytick.labelsize'] = 12
