@@ -54,6 +54,7 @@ def plot_time_series(
     # save the image in plts
     save_image(saved_name, fig)
 
+    plt.legend()
     # show result
     plt.show()
 
@@ -95,7 +96,10 @@ def plot_single_plot(
     x_col (str): Name of the column to be used for the x-axis (time).
     y_col (list[str]): List of column names to be used for the y-axis (values).
     """
-    
+    if len(dfs) == 2:
+        labels = ["Window Sensor", "Door Sensor"]
+    else:
+        labels = [y_col]
     # because we are comparing 2 dfs, use a counter to determine the color of the line
     for idx, df in enumerate(dfs):
         sns.lineplot(
@@ -103,6 +107,7 @@ def plot_single_plot(
             x=x_col, 
             y=y_col[idx] if isinstance(y_col, list) else y_col,
             alpha=0.5,
+            label=labels[idx],
             color='blue' if idx == 1 else 'green',
         )
 
