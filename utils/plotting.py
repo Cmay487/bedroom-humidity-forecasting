@@ -12,7 +12,7 @@ def plot_time_series(
     title: str | None = None,
     xlabel: str | None = None,
     ylabel: str | None = None,
-    
+    add_hlines: bool = False,
 ) -> None:
     """
     Plots a time series line plot.
@@ -24,8 +24,9 @@ def plot_time_series(
     title (str, optional): Title of the plot. Defaults to None.
     xlabel (str, optional): Label for the x-axis. Defaults to None.
     ylabel (str, optional): Label for the y-axis. Defaults to None.
+    add_hlines (bool, optional): Whether to add horizontal lines. Defaults to False.
     """
-    print(len(y_col))
+ 
     if len(y_col) > 1:
         fig, axes = plt.subplots(len(y_col), 1, figsize=(12, 8))
 
@@ -39,8 +40,13 @@ def plot_time_series(
         plot_single_plot(dfs, x_col, y_col[0], title, xlabel, ylabel)
 
 
+    if add_hlines:
+        # add horizontal lines
+        add_hlines(fig, [40, 60])
+
     # save the image in plts
     save_image(saved_name, fig)
+
 
 def plot_subplots(
         axes:object, 
@@ -105,6 +111,28 @@ def plot_single_plot(
 
     # make adjsutments to the plot
     plot_cleanup(None, title, xlabel, ylabel)
+
+def add_hlines(fig: object,y_values: list[float]) -> None:
+    """
+    Adds horizontal lines to the plot.
+
+    Parameters:
+    fig (object): The figure object to add the lines to.
+    y_values (list[float]): List of y-values where the lines should be drawn.
+    """
+
+    # get the count of plots
+    plot_count = len(fig.axes)
+
+    # loop through the axes and add the horizontal lines
+    for i in range(plot_count):
+        fig.axes[i].axhline(
+            y=y_values, 
+            color='grey', 
+            linestyle='--', 
+            alpha=0.7, 
+            linewidth=2.5
+            )
 
 def plot_cleanup(
         axes: object | None = None, 
