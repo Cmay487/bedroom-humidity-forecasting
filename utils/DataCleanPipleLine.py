@@ -152,7 +152,7 @@ class DataImportAndCleaningPipeline:
         )
         self.df["DailyAvgHumidity"] = (
             self.df.groupby(daily)["Humidity"].transform("mean")
-)
+        )
 
     def ImputeMissingData(self):
 
