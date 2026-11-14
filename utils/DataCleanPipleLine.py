@@ -144,23 +144,21 @@ class DataImportAndCleaningPipeline:
         # ========================
         # Add Time Series Features
         # ========================
-        self.df['Date'] = pd.to_datetime(self.df['DateTime'].dt.date, dayfirst=True)
-        self.df['UkDate'] = self.df['Date'].dt.strftime('%d/%m/%Y')
-
+        self.df['Date'] = pd.to_datetime(self.df.index.date, dayfirst=True)
 
         # add year month
-        self.df['YearMonth'] = self.df['DateTime'].dt.to_period("M")
+        self.df['YearMonth'] = self.df['Date'].dt.to_period("M")
 
         # add end of week & convert to uk date format
         self.df['EndOfWeek'] = (
-            self.df['DateTime'] - pd.to_timedelta(self.df['DateTime'].dt.weekday, unit='D') + pd.to_timedelta(6, unit='D')
+            self.df['Date'] - pd.to_timedelta(self.df['Date'].dt.weekday, unit='D') + pd.to_timedelta(6, unit='D')
             )
 
         # get the time value
-        self.df['Time'] = self.df['DateTime'].dt.time
-        self.df['Time_Numeric'] = pd.to_timedelta(self.df['DateTime'].dt.strftime('%H:%M:%S')).dt.floor('min')
+        self.df['Time'] = self.df['Date'].dt.time
+        self.df['Time_Numeric'] = pd.to_timedelta(self.df['Date'].dt.strftime('%H:%M:%S')).dt.floor('min')
 
-        daily = self.df["DateTime"].dt.floor("D")
+        daily = self.df["Date"].dt.floor("D")
 
         # create a daily average column
         self.df["DailyAvgTemperature"] = (
@@ -175,9 +173,9 @@ class DataImportAndCleaningPipeline:
         Uses Interpolation to fill in missing data.
         """
 
-    # ========================
-    # Impute NaN with Interpolation
-    # ========================
+        # ========================
+        # Impute NaN with Interpolation
+        # ========================
 
         # take min and max dates
         min_dt = self.df.index.min()
