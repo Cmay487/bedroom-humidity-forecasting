@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-import os
+
 
 # in the dataload, check if a batch is in the dataset but not in the cleaned dataset. extract what is not in the cleaned dataset and 
 # pass through the pipeline.
@@ -13,6 +13,10 @@ class DataImportAndCleaningPipeline:
         
     # load dataset & clean
     def DataLoad(self):
+        """
+        Loads data from csv location
+
+        """
         # load the data into the pipeline
         self.df = pd.read_csv(self.file_location)
 
@@ -31,7 +35,9 @@ class DataImportAndCleaningPipeline:
 
     
     def RemoveDuplicates(self):
-        """Drop duplicate rows based on the 'DateTime' column."""
+        """
+        Drop duplicate rows based on the 'DateTime' column.
+        """
         # ====================
         # Duplicates
         # ====================
@@ -45,6 +51,10 @@ class DataImportAndCleaningPipeline:
             print("*"*30)
     
     def RemoveOutliers(self):
+        """
+        Removes outliers that are greater than 3 standard
+        deviations from the mean
+        """
         # ====================
             # Outliers
         # ====================
@@ -88,10 +98,13 @@ class DataImportAndCleaningPipeline:
             
     
     def CleanDateData(self):
+        """
+        Cleans up DateTime feature type
+        """
     
-    # ========================
-    # Date Type Cleaning
-    # ========================
+        # ========================
+        # Date Type Cleaning
+        # ========================
 
         # remove any dead space.
         self.df['DateTime'] = self.df['DateTime'].astype(str).str.strip()
@@ -125,9 +138,12 @@ class DataImportAndCleaningPipeline:
 
 
     def AddTimeSeriesFeatures(self):
-    # ========================
-    # Add Time Series Features
-    # ========================
+        """
+        Creates time series features for modelling
+        """
+        # ========================
+        # Add Time Series Features
+        # ========================
         self.df['Date'] = pd.to_datetime(self.df['DateTime'].dt.date, dayfirst=True)
         self.df['UkDate'] = self.df['Date'].dt.strftime('%d/%m/%Y')
 
@@ -155,14 +171,17 @@ class DataImportAndCleaningPipeline:
         )
 
     def ImputeMissingData(self):
+        """
+        Uses Interpolation to fill in missing data.
+        """
 
     # ========================
     # Impute NaN with Interpolation
     # ========================
 
         # take min and max dates
-        min_dt = self.index.min()
-        max_dt = self.index.max()
+        min_dt = self.df.index.min()
+        max_dt = self.df.index.max()
 
         # create full date df
         full_dt_df = pd.date_range(
@@ -188,13 +207,16 @@ class DataImportAndCleaningPipeline:
         self.df = merged_df
 
     def count_of_missing_data(self, df:pd.DataFrame, col:str="Humidity") -> None:
+        """
+        Counts the missing data that have been imputed.
+        """
         
         samples_size = len(df)
         missing_count = df[col].isna().sum()
 
         print("*"*100)
         print(f"{missing_count} missing data points was imputed\n")
-        print(f"{missing_count/samples_size*100}% was imputed")
+        print(f"{missing_count/samples_size*100:.2f}% was imputed")
         print("*"*100)
 
 
