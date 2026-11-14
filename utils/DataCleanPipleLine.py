@@ -220,13 +220,16 @@ class DataImportAndCleaningPipeline:
 
 
                           
-    def RunPipeline(self) -> pd.DataFrame:
+    def RunPipeline(self, impute_missing_data:bool=True) -> pd.DataFrame:
         """Helper method to run everything in the correct order."""
         self.DataLoad()
         self.CleanDateData()
         self.RemoveDuplicates()
         self.RemoveOutliers()
-        self.ImputeMissingData()
+
+        if impute_missing_data:
+            self.ImputeMissingData()
+            
         self.AddTimeSeriesFeatures()
 
         return self.df
