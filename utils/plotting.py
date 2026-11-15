@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from utils.config import title_params
-
+import scipy.stats as st
 
 def plot_time_series(
     dfs: list[pd.DataFrame],
@@ -200,11 +200,7 @@ def plot_histogram(
     # because we are always comparing 2 dfs, use a counter to determine the color of the line
     for i, df in enumerate(dfs):
 
-        print(f"{df[x_col].describe()} \n", end="\n")
-        # now review skewness and kurtosis
-
-        print(f"Skewness: {df[x_col].skew()}")
-        print(f"Kurtosis: {df[x_col].kurt()}")
+        data_stats(df,x_col)
 
         sns.histplot(
             data=df, 
@@ -219,6 +215,32 @@ def plot_histogram(
 
     #save the image
     save_image(saved_name, fig)
+
+def data_stats(df:pd.DataFrame, x_col:str) -> None:
+    """
+    Prints the stats of the given df
+
+    Parameters:
+        df (pd.DataFrame): List of DataFrames containing the data.
+        x_col (str): Name of the column to be used for the analysis.
+
+    """
+
+    # desc stats
+    print(f"{df[x_col].describe()} \n", end="\n")
+
+    # now review skewness and kurtosis
+    print(f"Skewness: {df[x_col].skew():.2f}")
+    print(f"Kurtosis: {df[x_col].kurt():.2f}", end="\n")
+
+    # print the confidence interval
+    l_ci, u_ci = st.norm.interval(confidence=0.95,loc=np.mean(df[x_col]), scale=st.sem(df[x_col]))
+
+    # print the bounds
+    print(f"Upper Confidence Interval: {u_ci}")
+    print(f"Lower Confidence Interval: {l_ci}")
+
+
 
 def plot_relationships(
     df: pd.DataFrame,

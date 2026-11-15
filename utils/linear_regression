@@ -91,30 +91,4 @@
                     # Single NaN or end of a gap: Use Forward Fill
                     FullDatesDf.loc[i, 'Temperature (oC)'] = FullDatesDf.loc[i-1, 'Temperature (oC)']
             
-        # write to cleaned data csv file to prevent running the same code over and over 
-        # when the data is 100k rows+
-
-        file_name = "Cleaned_air_qual_log.csv" if "eCo2" in self.df.columns else "Cleaned_temp_log.csv" 
-        folder = r"C:\Users\Charl\OneDrive\Python\Projects\Temp Data\\"
-        location =  os.path.join(folder, file_name)
-
-        # 2. Check if the FOLDER exists. If not, create it.
-        if folder and not os.path.exists(folder):
-            os.makedirs(folder)
-            
-        # 3. Check if the FILE exists so we know if we need a header
-        file_exists = os.path.isfile(location)
-            
-        #4. Use 'a' for APPEND so we don't delete previous data
-        header = FullDatesDf.columns
-        payload = FullDatesDf.loc[:i+1].values
-        with open(location, 'a') as file:
-            if not file_exists:
-                # Add the header only if the file was just created
-                file.write(header)
-                
-
-            # 5. Append the new data
-            file.write(f"{payload}\n")
-        
-        print(f"Process Complete. File saved to: {location}")
+    
