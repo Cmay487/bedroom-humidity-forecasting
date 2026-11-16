@@ -49,7 +49,18 @@ def season_decomp(df:pd.DataFrame, resample_size:str):
         # run seasonal decomp
         result = seasonal_decompose(df_copy[feature], model=model, period=period)
 
-        #plot results
-        fig = result.plot();
-        fig.set_size_inches(14, 10)
-        plt.show();
+        # show results
+        fig, axes = plt.subplots(4, 1, figsize=(14, 10), sharex=False)
+
+        # show observed
+        result.observed.plot(ax=axes[0], title=feature, lw=0.8)
+
+        # rolling avg (trend)
+        result.trend.plot(ax=axes[1], ylabel="Trend")
+
+        # only show the first 3 cycles as these repeat
+        result.seasonal.iloc[:period * 3].plot(ax=axes[2], ylabel="Seasonal (3 cycles)")
+        axes[3].scatter(result.resid.index, result.resid.values, s=2, alpha=0.3)
+        axes[3].set_ylabel("Resid")
+        plt.tight_layout()
+
