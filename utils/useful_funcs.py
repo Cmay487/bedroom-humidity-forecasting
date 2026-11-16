@@ -61,6 +61,7 @@ def season_decomp(df:pd.DataFrame, resample_size:str):
         # only show the first 3 cycles as these repeat
         result.seasonal.iloc[:period * 3].plot(ax=axes[2], ylabel="Seasonal (3 cycles)")
         axes[3].scatter(result.resid.index, result.resid.values, s=2, alpha=0.3)
+        axes[3].axhline(0, color="black", lw=0.8)
         axes[3].set_ylabel("Resid")
         plt.tight_layout()
 
