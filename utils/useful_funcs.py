@@ -1,3 +1,9 @@
+"""Utility functions for exploratory data analysis and time-series preprocessing.
+
+This module contains helpers for resampling sensor data, decomposing seasonal
+patterns, and calculating a simple variance-based R-squared style summary.
+"""
+
 # preprocessing
 from utils import DataCleanPipleLine
 

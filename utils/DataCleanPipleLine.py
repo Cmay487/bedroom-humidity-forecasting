@@ -1,3 +1,10 @@
+"""Data cleaning and preprocessing utilities for sensor data.
+
+This module loads raw sensor readings, standardises dates, removes duplicate and
+outlier values, fills missing records, and adds time-based feature columns used in
+subsequent forecasting and analysis workflows.
+"""
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -8,14 +15,31 @@ from sklearn.preprocessing import StandardScaler
 
 class DataImportAndCleaningPipeline:
     def __init__(self,file_location : str):
+        """
+        Initialise the pipeline with the location of the source CSV file.
+
+        Args:
+            file_location (str): Path to the raw sensor dataset.
+
+        Returns:
+            None: Stores the file path on the instance and creates an empty dataframe
+            placeholder.
+        """
         self.df = None
         self.file_location = file_location
         
     # load dataset & clean
     def DataLoad(self):
         """
-        Loads data from csv location
+        Load the CSV file into memory and perform initial cleaning of column names and
+        the leading rows.
 
+        Args:
+            None.
+
+        Returns:
+            None: Updates the instance's ``df`` attribute with the loaded and trimmed
+            dataset.
         """
         # load the data into the pipeline
         self.df = pd.read_csv(self.file_location)
@@ -36,7 +60,13 @@ class DataImportAndCleaningPipeline:
     
     def RemoveDuplicates(self):
         """
-        Drop duplicate rows based on the 'DateTime' column.
+        Remove duplicate readings based on the DateTime field.
+
+        Args:
+            None.
+
+        Returns:
+            None: Drops repeated rows from ``self.df`` in place.
         """
         # ====================
         # Duplicates
@@ -52,8 +82,14 @@ class DataImportAndCleaningPipeline:
     
     def RemoveOutliers(self):
         """
-        Removes outliers that are greater than 3 standard
-        deviations from the mean
+        Replace numeric outliers with the previous valid reading using a 3-sigma rule.
+
+        Args:
+            None.
+
+        Returns:
+            None: Modifies ``self.df`` by imputing outlier values and removing the
+            temporary standardised columns used during detection.
         """
         # ====================
             # Outliers
@@ -99,7 +135,14 @@ class DataImportAndCleaningPipeline:
     
     def CleanDateData(self):
         """
-        Cleans up DateTime feature type
+        Standardise the DateTime column to a consistent datetime format and set it as the index.
+
+        Args:
+            None.
+
+        Returns:
+            None: Converts the raw date strings into timezone-aware pandas timestamps
+            and stores them in the dataframe index.
         """
     
         # ========================
@@ -139,7 +182,14 @@ class DataImportAndCleaningPipeline:
 
     def AddTimeSeriesFeatures(self):
         """
-        Creates time series features for modelling
+        Create time-based features for forecasting and exploratory analysis.
+
+        Args:
+            None.
+
+        Returns:
+            None: Adds date, month, week, time, and daily average feature columns to
+            ``self.df``.
         """
         # ========================
         # Add Time Series Features
@@ -170,7 +220,15 @@ class DataImportAndCleaningPipeline:
 
     def ImputeMissingData(self):
         """
-        Uses Interpolation to fill in missing data.
+        Reindex the dataset to a one-minute timeline and linearly interpolate missing
+        numeric values.
+
+        Args:
+            None.
+
+        Returns:
+            None: Replaces missing sensor readings in ``self.df`` with interpolated
+            values and stores the completed dataframe back on the instance.
         """
 
         # ========================
@@ -206,7 +264,15 @@ class DataImportAndCleaningPipeline:
 
     def count_of_missing_data(self, df:pd.DataFrame, col:str="Humidity") -> None:
         """
-        Counts the missing data that have been imputed.
+        Print a summary of how much missing data was present in a target field.
+
+        Args:
+            df (pd.DataFrame): Dataframe to inspect for missing values.
+            col (str): Column name to use when counting missing entries. Defaults to
+                ``"Humidity"``.
+
+        Returns:
+            None: Prints the missing count and percentage to the console.
         """
         
         samples_size = len(df)
@@ -221,7 +287,17 @@ class DataImportAndCleaningPipeline:
 
                           
     def RunPipeline(self, impute_missing_data:bool=True) -> pd.DataFrame:
-        """Helper method to run everything in the correct order."""
+        """
+        Run the full cleaning pipeline in the correct order.
+
+        Args:
+            impute_missing_data (bool): If ``True``, interpolate missing readings after
+                removing duplicates and outliers. Defaults to ``True``.
+
+        Returns:
+            pd.DataFrame: The cleaned dataframe with repaired timestamps, imputed
+            values, and engineered time features.
+        """
         self.DataLoad()
         self.CleanDateData()
         self.RemoveDuplicates()
