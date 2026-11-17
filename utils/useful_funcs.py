@@ -174,7 +174,7 @@ def model_vs_reality(model:object, target:str, sample_size:int=1000) -> None:
         None,
         title="Seasonal Decomposition",
         xlabel="DateTime",
-        ylabel="Humidity (%)"
+        ylabel=target
         )
 
 
