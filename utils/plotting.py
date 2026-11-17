@@ -169,6 +169,7 @@ def plot_cleanup(
 
     # despine
     sns.despine()
+    plt.tight_layout()
 
 def plot_histogram(
     dfs: list[pd.DataFrame],

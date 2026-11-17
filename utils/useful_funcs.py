@@ -76,10 +76,8 @@ def season_decomp(df:pd.DataFrame, resample_size:str) -> None:
         summary values for each feature rather than returning data.
     """
     
-    # take a copy
-    df_copy = df[['Humidity','Temperature (oC)']].copy()
-
     # resample - mean
+    df_copy = df.copy()
     df_copy = df_copy.resample(resample_size).mean()
 
     # run a season decomposition on humidity and temp
@@ -109,6 +107,8 @@ def season_decomp(df:pd.DataFrame, resample_size:str) -> None:
         axes[3].set_ylabel("Resid")
         plt.tight_layout()
 
+    return result
+
 def calculate_r2(df:pd.DataFrame, result:object, feature:str) -> None:
     """
     Calculate a basic R-squared-style fit score for the residuals from a seasonal
@@ -128,3 +128,10 @@ def calculate_r2(df:pd.DataFrame, result:object, feature:str) -> None:
     data_var = np.var(df)
     result_var = np.var(result)
     print(f"{feature} R2: {1 - result_var/data_var:.2f}")
+
+def model_vs_reality(df:pd.DataFrame, model:object) -> None:
+    """
+    
+    """
+
+    
