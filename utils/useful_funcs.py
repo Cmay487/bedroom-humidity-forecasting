@@ -129,9 +129,53 @@ def calculate_r2(df:pd.DataFrame, result:object, feature:str) -> None:
     result_var = np.var(result)
     print(f"{feature} R2: {1 - result_var/data_var:.2f}")
 
-def model_vs_reality(df:pd.DataFrame, model:object) -> None:
+def model_vs_reality(model:object, target:str, sample_size:int=1000) -> None:
     """
     
     """
+    pred_df = (
+    pd.DataFrame(
+            model.trend + model.seasonal,
+            columns=['pred']
+        )
+        .dropna()
+    )
+
+    # get observed
+    actual_df = pd.DataFrame(model.observed)
+
+    # plot results
+    fig = plt.figure(figsize=(12,8))
+
+    # lets take a small sample to gauge what is happening!
+    sample = sample_size
+
+    # plot results
+    sns.lineplot(
+        data=pred_df.iloc[:sample],
+        x=pred_df.index[:sample],
+        y='pred',
+        linestyle='--',
+        color='green',
+        label='Prediction'
+    )
+    sns.lineplot(
+        data=actual_df.iloc[:sample],
+        x=actual_df.index[:sample],
+        y=target,
+        color='grey',
+        alpha=0.4,
+        label='Observed'
+    )
+
+
+    # plot clean up
+    plot.plot_cleanup(
+        None,
+        title="Seasonal Decomposition",
+        xlabel="DateTime",
+        ylabel="Humidity (%)"
+        )
+
 
     
