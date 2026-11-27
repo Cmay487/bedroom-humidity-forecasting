@@ -3,6 +3,9 @@
 This module contains helpers for resampling sensor data, decomposing seasonal
 patterns, and calculating a simple variance-based R-squared style summary.
 """
+# remove warnings
+import warnings
+warnings.filterwarnings('ignore')
 
 # preprocessing
 from utils import DataCleanPipleLine
@@ -187,7 +190,7 @@ def model_vs_reality(model:object, target:str, sample_size:int=1000) -> None:
         )
 
 
-def adf_test(df:pd.DataFrame, alpha:float) -> None:
+def stationary_test(df:pd.DataFrame, alpha:float, test:str) -> None:
     """
     Test whether a time-series sample is stationary using the Augmented Dickey-Fuller test.
 
@@ -202,15 +205,59 @@ def adf_test(df:pd.DataFrame, alpha:float) -> None:
     
     sample_copy = df.copy()
 
+    # in case i forget about the alpha!
     if alpha > 0.1:
         raise ValueError("Please select a alpha <= 0.1")
 
-    result_adf = adfuller(x=sample_copy.values,result_object=True)
-    p = result_adf[1]
+    # in case I spell the test incorrectly
+    if test not in ['ADF','KPSS']:
+        raise ValueError("Please select the correct test -> ADF or KPSS")
+    
 
-    # show results
-    print(f"P-Value {p:.4f}")
-    if p <= alpha:
-        print("Reject the Null Hypothesis. There is evidence that the sample is Stationary")
+    if test == "ADF":
+        result = adf_test(sample_copy)
     else:
-        print("Unable to reject the Null Hypothesis as there is little evidence to do so.")
+        result = kpss_test(sample_copy)
+    p = result['p-value']
+
+    if p <= alpha:
+        print("\nReject the Null Hypothesis.")
+    else:
+        print("\nUnable to reject the Null Hypothesis as there is little evidence to do so.")
+
+def adf_test(timeseries):
+    print("Results of Dickey-Fuller Test:")
+    dftest = adfuller(timeseries, autolag="AIC", result_object=True)
+
+    dfoutput = pd.Series(
+        [dftest.statistic, dftest.pvalue, dftest.lags, int(dftest.nobs)],
+        index=[
+            "Test Statistic",
+            "p-value",
+            "#Lags Used",
+            "Number of Observations Used",
+        ],
+    )
+
+    for key, value in dftest.critical_values.items():
+        dfoutput[f"Critical Value ({key})"] = value
+    print(dfoutput)
+
+    return dfoutput
+
+#
+def kpss_test(timeseries):
+
+    print("Results of KPSS Test:")
+
+    kpsstest = kpss(timeseries, regression="c", nlags="auto", result_object=True)
+    kpss_output = pd.Series(
+        [kpsstest.statistic, kpsstest.pvalue, kpsstest.lags], index=["Test Statistic", "p-value", "Lags Used"]
+    )
+
+    for key, value in kpsstest.critical_values.items():
+        kpss_output[f"Critical Value ({key})"] = value
+
+    print(kpss_output)
+
+    return kpss_output
