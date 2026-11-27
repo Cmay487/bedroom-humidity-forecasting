@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def train_val_test_split(df:pd.DataFranme) -> dict:
+def train_val_test_split(df:pd.DataFrame) -> dict:
     """
     
     """

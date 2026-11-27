@@ -131,7 +131,16 @@ def calculate_r2(df:pd.DataFrame, result:object, feature:str) -> None:
 
 def model_vs_reality(model:object, target:str, sample_size:int=1000) -> None:
     """
-    
+    Plot the trend and seasonal components of a decomposition against observed values.
+
+    Args:
+        model (object): Seasonal decomposition result containing trend, seasonal,
+            and observed components.
+        target (str): Name of the observed feature to plot.
+        sample_size (int): Maximum number of leading observations to display.
+
+    Returns:
+        None: Creates a line plot comparing the fitted and observed series.
     """
     pred_df = (
     pd.DataFrame(
@@ -178,4 +187,30 @@ def model_vs_reality(model:object, target:str, sample_size:int=1000) -> None:
         )
 
 
+def adf_test(df:pd.DataFrame, alpha:float) -> None:
+    """
+    Test whether a time-series sample is stationary using the Augmented Dickey-Fuller test.
+
+    Args:
+        df (pd.DataFrame): Time-series data to test for stationarity.
+        alpha (float): Significance level used to interpret the test result.
+            Must be less than or equal to 0.1.
+
+    Returns:
+        None: Prints the ADF test p-value and stationarity conclusion.
+    """
     
+    sample_copy = df.copy()
+
+    if alpha > 0.1:
+        raise ValueError("Please select a alpha <= 0.1")
+
+    result_adf = adfuller(x=sample_copy.values,result_object=True)
+    p = result_adf[1]
+
+    # show results
+    print(f"P-Value {p:.4f}")
+    if p <= alpha:
+        print("Reject the Null Hypothesis. There is evidence that the sample is Stationary")
+    else:
+        print("Unable to reject the Null Hypothesis as there is little evidence to do so.")
